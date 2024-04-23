@@ -1,0 +1,199 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>1INCH Daily</title>
+  <meta name="description" content="Token Prices">
+  <meta name="author" content="Belactriple9">
+  <!-- <link rel="stylesheet" href="styles.css"> -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+
+  <!-- Open Graph -->
+  <meta name="og:title" content="Token Prices" />
+  <meta name="og:url" content="https://timdeschryver.dev/posts/gridsome-social-cards" />
+  <meta name="og:description" content="Watch token prices in real time" />
+  <meta name="og:type" content="article" />
+  <meta name="og:image" content="/social.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="@belactriple9" />
+  <meta name="twitter:title" content="Token Prices" />
+  <meta name="twitter:description" content="Watch token prices in real time" />
+  <meta name="twitter:image" content="/social.png" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="content">
+      <div id="info-holder">
+        <!-- <p class="text">On Average $1INCH Goes Up</p> -->
+        <!-- <p class="text">$1INCH Price is currently</p>
+        <p class="number transparent" id="number">$0</p> -->
+
+        <!-- <p class="text">Every Day</p> -->
+      </div>
+    </div>
+    <footer>By <a class="handle" href="https://twitter.com/0xBe1ac"> @0xBe1ac</a> <span class="source">(<a
+          href="https://github.com/belactriple9/token-prices">source</a>)</span></footer>
+  </div>
+  </div>
+  <script>
+
+    function handleData(data, symbol) {
+        data = parseInt(data);
+        if (symbol == '$WBTC')
+            data = data / 10**16;
+        else 
+            data = data / 10**6;
+
+        // Check if the id `symbol` exists, if it does, update that instead of creating a new one
+        if (document.getElementById(`number ${symbol}`)) {
+            const el = document.getElementById(`number ${symbol}`);
+            el.innerHTML = `$${data.toFixed(6)}`;
+            // Reset animation by removing and re-adding the class
+            el.classList.remove('fade-in');
+            void el.offsetWidth; // Trigger reflow to reset animation
+            el.classList.add('fade-in');
+            return;
+        }
+
+        const ih = document.getElementById("info-holder");
+        const text = document.createElement('p');
+        text.classList.add('text');
+        text.innerHTML = `The price of ${symbol} is currently<br><p class="number" id="number ${symbol}">$${data.toFixed(6)}</p>`;
+        // Apply the fade-in class to the new element
+        text.lastElementChild.classList.add('fade-in');
+        ih.appendChild(text);
+    }
+
+
+    // function fetchAndHandleData() {
+    //     fetch("https://cloudflare-eth.com", {
+    //       "headers": {
+    //         "accept": "*/*",
+    //       },
+    //       "body": "{\"jsonrpc\":\"2.0\",\"id\":3436994882953190,\"method\":\"eth_call\",\"params\":[{\"from\":\"0x0000000000000000000000000000000000000000\",\"data\":\"0x802431fb000000000000000000000000111111111117dc0aa78b770fa6a738034120c302000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0addd25a91563696d8567df78d5a01c9a991f9b8\"},\"latest\"]}",
+    //       "method": "POST",
+    //     }).then(response => response.json())
+    //     .then(data => {
+    //       handleData(data.result);
+    //     });
+    // }
+
+    function arbitraryFetchAndHandleData(arrOfTokens) {
+        arrOfTokens.forEach((token, index) => {
+            fetch("https://cloudflare-eth.com	", {
+                "headers": {
+                "accept": "*/*",
+                },
+                "body": "{\"jsonrpc\":\"2.0\",\"id\":3436994882953190,\"method\":\"eth_call\",\"params\":[{\"from\":\"0x0000000000000000000000000000000000000000\",\"data\":\"0x802431fb000000000000000000000000" + token.replace('0x', '') +"000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000000000000\",\"to\":\"0x0addd25a91563696d8567df78d5a01c9a991f9b8\"},\"latest\"]}",
+                "method": "POST",
+            }).then(response => response.json())
+            .then(data => {
+                handleData(data.result, tokenSymbols[index]);
+            });
+        });
+    }
+
+    const tokenSymbols = [
+        '$WBTC',
+        '$WETH',
+        '$1INCH',
+        '$SAFE'
+    ]
+
+    const tokens = [
+        '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599', // wbtc
+        '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // wETH
+        '0x111111111117dc0aa78b770fa6a738034120c302', // 1inch
+        '0x5afe3855358e112b5647b952709e6165e1c1eeee' // safe
+    ]
+
+    arbitraryFetchAndHandleData(tokens);
+    setTimeout(() => {
+    arbitraryFetchAndHandleData(tokens);
+    }, 12000)
+
+
+
+
+    // TODO: error handling
+    // fetch('https://api.cryptonator.com/api/ticker/1inch-usd')
+    //   .then(response => response.json())
+    //   .then(data => handleData(data))
+  </script>
+</body>
+<style>
+  body {
+    font-family: 'Special Elite', cursive;
+    background-image: linear-gradient(to right, rgba(13, 24, 42), rgba(8, 12, 21), rgba(28, 19, 38));
+  }
+
+  footer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: white;
+  }
+
+  a:link {
+    color: inherit;
+  }
+
+  a:visited {
+    color: inherit;
+  }
+
+  .container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .text {
+    font-size: 2rem;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    color: white;
+  }
+
+  .number {
+    font-size: 6rem;
+    text-align: center;
+    padding: 0;
+    margin: 4rem 0 2rem 0;
+    color: white;
+  }
+
+  .transparent {
+    color: transparent;
+  }
+
+  .handle {
+    margin: 0 0.5rem 0 0.5rem;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .fade-in {
+    animation: fadeIn 1s ease-out;
+  }
+
+</style>
+
+</html>j
